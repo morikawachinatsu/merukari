@@ -1,0 +1,53 @@
+<%= form_with(model: @item, local: true, data: { controller: "images" }) do |f| %>
+  <div class="mb-3">
+    <%= f.label :title, "タイトル", class: "font-semibold block p-1" %>
+    <%= f.text_field :title, autofocus: true, class: "form-input" %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :price, "価格", class: "font-semibold block p-1" %>
+    <%= f.number_field :price, size: 140, class: "form-input" %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :description, "説明", class: "font-semibold block p-1" %>
+    <%= f.text_field :description, size: 140, class: "form-input" %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :images, "画像", class: "font-semibold block p-1" %>
+    <%= f.file_field :images, multiple: true, accept: "image/jpeg,image/gif,image/png", data: { images_target: "select", action: "change->images#selectImages" }, class: "form-input" %>
+  </div>
+
+  <div data-images-target="preview">
+    <% if @item.images.attached? %>
+      <% @item.images.each do |image| %>
+        <div class="image-box inline-flex mx-1 mb-5" data-controller="images" data-images-target="image_box">
+          <div class="text-center">
+            <%= image_tag image, width: 100 %>
+            <a class="link cursor-pointer text-red-500" data-action="click->images#deleteImage">削除</a>
+            <%= f.hidden_field :images, name: "item[images][]", value: image.blob.id %>
+          </div>
+        </div>
+      <% end %>
+
+
+      <div class='form-group'>
+        <%= f.collection_check_boxes(:tag_ids, Tag.all, :id, :name) do |tag| %>
+            <div class='form-check'>
+                <%= tag.label class: 'form-check-label' do %>
+                    <%= tag.check_box class: 'form-check-input' %>
+                    <%= tag.text %>
+                <% end %>
+            </div>
+        <% end %>
+    </div>
+    <% end %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.submit "投稿する", class: "btn btn-primary" %>
+  </div>
+<% end %>
+
+<%= link_to "Tweet一覧に戻る", items_path, class: "text-blue-500 underline" %>

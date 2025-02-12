@@ -1,0 +1,10 @@
+<h2>コメント編集</h2>
+
+<%= form_with(model: [@item, @comment], local: true) do |f| %>
+  <div>
+    <%= f.text_area :content, placeholder: "コメントを編集..." %>
+  </div>
+  <%= f.submit "更新する" %>
+<% end %>
+
+<%= link_to "キャンセル", item_path(@item) %>

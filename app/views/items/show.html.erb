@@ -1,0 +1,49 @@
+<h1>GeekTwitter</h1>
+<h3>Tweet詳細</h3>
+<div class="item">
+  <p><%= @item.price %></p>
+<p><%= @item.description %></p>
+    <p><%= @item.title %></p>
+  <p><%= @item.created_at %></p>
+  
+</div>
+<% if user_signed_in? %>
+     <% if current_user.already_liked?(@item) %>
+        <%= link_to item_like_path(id: @item.id, item_id: @item.id), data: { turbo_method: :delete } do %>
+            <p>いいねを取り消す</p><%= @item.likes.count %>
+        <% end %>
+     <% else %>
+        <%= link_to item_likes_path(id: @item.id, item_id: @item.id), data: { turbo_method: :post }  do %>
+            <p>いいね</p><%= @item.likes.count %>
+        <% end %>
+     <% end %>
+<% else %>
+    <p>いいねの数 = </p><%= @item.likes.count %>
+<% end %>
+
+<div class="comment-wrapper">
+  <p>コメント一覧</p>
+<% @comments.each do |c| %>
+  <div>
+    <%= c.user.email unless c.user.blank? %>
+    <br>
+    <%= c.content %>
+    
+    <% if user_signed_in? && c.user == current_user %>
+      <%= link_to "削除する", item_comment_path(@item, c), data: { turbo_method: :delete } %>
+      
+      <%= link_to "編集する", edit_item_comment_path(@item, c) %>
+
+    <% end %>
+  </div>
+  <br>
+<% end %>
+
+<% if user_signed_in? %>
+  <%= form_with(model: [@item, @comment], local: true) do |f| %>
+    <%= f.text_area :content %>
+    <%= f.submit "コメントする" %>
+  <% end %>
+<% end %>
+
+

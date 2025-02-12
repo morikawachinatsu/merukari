@@ -1,0 +1,182 @@
+<%= link_to 'ログアウト', destroy_user_session_path, data: { turbo_method: :delete } %>
+<% if user_signed_in? %>
+  <%= link_to "マイページへ", user_path(current_user.id) %>
+<% end %>
+
+<% if user_signed_in? %>
+<%= form_with(model: @item, local: true, data: { controller: "images" }) do |f| %>
+  
+
+  <div class="mb-3">
+    <%= f.label :title, "タイトル", class: "font-semibold block p-1" %>
+    <%= f.text_field :title, autofocus: true, class: "form-input" %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :price, "価格", class: "font-semibold block p-1" %>
+    <%= f.number_field :price, size: 140, class: "form-input" %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :description, "説明", class: "font-semibold block p-1" %>
+    <%= f.text_field :description, size: 140, class: "form-input" %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :images, "画像", class: "font-semibold block p-1" %>
+    <%= f.file_field :images, multiple: true, accept: "image/jpeg,image/gif,image/png", data: { images_target: "select", action: "change->images#selectImages" }, class: "form-input" %>
+  </div>
+
+  <div data-images-target="preview">
+    <% if @item.images.attached? %>
+      <% @item.images.each do |image| %>
+        <div class="image-box inline-flex mx-1 mb-5" data-controller="images" data-images-target="image_box">
+          <div class="text-center">
+            <%= image_tag image, width: 100 %>
+            <a class="link cursor-pointer text-red-500" data-action="click->images#deleteImage">削除</a>
+            <%= f.hidden_field :images, name: "item[images][]", value: image.blob.id %>
+          </div>
+        </div>
+      <% end %>
+
+
+      <div class='form-group'>
+        <%= f.collection_check_boxes(:tag_ids, Tag.all, :id, :name) do |tag| %>
+            <div class='form-check'>
+                <%= tag.label class: 'form-check-label' do %>
+                    <%= tag.check_box class: 'form-check-input' %>
+                    <%= tag.text %>
+                <% end %>
+            </div>
+        <% end %>
+    </div>
+    <% end %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.submit "投稿する", class: "btn btn-primary" %>
+  </div>
+<% end %>
+<% end %>
+
+
+<% @items.each do |item| %>
+  <% if item.user.image.attached? %>
+     <%= image_tag  item.user.image, size: '250x200'%>
+  <% end %>
+
+
+  <div class="item mb-8 p-4 border-b border-gray-200">
+    <p><strong>価格:</strong> <%= item.price %></p>
+    <p><strong>説明:</strong> <%= item.description %></p>
+    <p><strong>タイトル:</strong> <%= item.title %></p>
+    <p><strong>メール:</strong> <%= item.user.email %></p>
+
+    <p><strong>投稿日時:</strong> <%= item.created_at.strftime("%Y-%m-%d %H:%M") %></p>
+</div>
+<%= link_to item_path(item) do %>
+ 
+
+    <%if item.favorites.count>0 %>
+      soldout
+<% else %>
+  
+  <% if item.images.attached? %>
+      <div class="image-preview">
+        <% item.images.each do |image| %>
+          <div class="mb-2 inline-flex">
+            <%= image_tag(image, width: 100, class: "") %>
+          </div>
+        <% end %>
+      </div>
+<% end %>
+<% end %>
+    <% if item.images.attached? %>
+      <div class="image-preview">
+        <% item.images.each do |image| %>
+          <div class="mb-2 inline-flex">
+            <%= image_tag(image, width: 100, class: "") %>
+          </div>
+        <% end %>
+      </div>
+  
+    <% end %>
+    <% end %>
+    
+
+    <div class="actions mt-4">
+      <% if user_signed_in? && current_user.id == item.user_id %>
+      <%= link_to "詳細へ", item_path(item), class: "btn btn-primary mr-2" %>
+      <%= link_to "編集する", edit_item_path(item), class: "btn btn-secondary mr-2" %>
+      <%= link_to "削除する", item_path(item), data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" }, class: "btn btn-danger" %>
+      <% elsif current_user.admin? %>
+        <%= link_to "管理者用編集", edit_post_path(t.id) %>
+        <%= link_to "管理者用削除", post_path(t.id), data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" }, class: "btn btn-danger" %>
+      <% end %>
+  
+    </div>
+
+    <% if user_signed_in? %>
+     <% if current_user.already_liked?(item) %>
+        <%= link_to item_like_path(id: item.id, item_id: item.id), data: { turbo_method: :delete } do %>
+            <p>いいねを取り消す</p><%= item.likes.count %>
+        <% end %>
+     <% else %>
+        <%= link_to item_likes_path(id: item.id, item_id: item.id), data: { turbo_method: :post }  do %>
+            <p>いいね</p><%= item.likes.count %>
+        <% end %>
+     <% end %>
+<% else %>
+
+    <p>いいねの数 = </p><%= item.likes.count %>
+<% end %>
+    
+  
+
+    <div class="favorite-actions mt-4">
+  <% if user_signed_in? %>
+     <% if current_user.already_favorited?(item) %>
+        <%= link_to item_favorite_path(id: item.id, item_id: item.id), data: { turbo_method: :delete } do %>
+            <p>カートから外す</p><%= item.favorites.count %>
+        <% end %>
+     <% else %>
+        <%= link_to item_favorites_path(id: item.id, item_id: item.id), data: { turbo_method: :post }  do %>
+            <p>カートに入れる</p><%= item.favorites.count %>
+        <% end %>
+     <% end %>
+<% else %>
+
+    <p>いいねの数 = </p><%= item.favorites.count %>
+<% end %>
+</div>
+
+  </div>
+<% end %>
+
+  <%= form_tag({controller:"items",action:"index"}, method: :get) do %>
+    <% Tag.all.each do |t| %>
+        <li><%= check_box :tag_ids, t.name %><%= t.name %></li>
+    <% end %>
+    <%= submit_tag '検索' %>
+    
+<% end %>
+
+
+<% if user_signed_in? %>
+   <% if current_user.admin? %>
+<%= form_tag({controller:"items",action:"index"}, method: :get) do %>
+    <%= text_field_tag :tag %>
+    <%= submit_tag 'タグを追加' %>
+
+<% end %>
+<% end %>
+  <% end %>
+
+  <%= search_form_for @q do |f| %>
+  <%= f.search_field :title_or_description_cont, class: 'form-control', placeholder: '検索ワード' %>
+  <%= f.number_field :price_gteq, class: 'form-control', placeholder: '最低価格' %>
+  <%= f.number_field :price_lteq, class: 'form-control', placeholder: '最高価格' %>
+
+  <%= f.submit '検索', class: 'btn btn-primary' %>
+<% end %>
+

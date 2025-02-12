@@ -1,0 +1,40 @@
+<h1>users#show</h1>
+<p>名前 : <%= @user.name %></p>
+<p>メールアドレス : <%= @user.email %></p>
+<p>プロフィール : <%= @user.profile %></p>
+
+<% if current_user.id == @user.id %>
+  <%= link_to "編集する", edit_user_registration_path %>
+<% end %>
+
+<% if @user.image.attached? %>
+     <%= image_tag  @user.image, size: '250x200'%>
+<% end %>
+
+<h2>ユーザーの投稿一覧</h2>
+<% @user.items.each do |t| %>
+  <%= t.user.name %>
+  <%= t.title %>
+   <%= t.price %>
+    <%= t.description %>
+<% end %>
+
+
+<% if current_user.id == @user.id %>
+
+<h2>カート一覧</h2>
+<% if @favorited_items.any? %>
+  <ul>
+    <% @favorited_items.each do |item| %>
+      <li>
+        <%= link_to item.name, item_path(item) %> - <%= item.description %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p>まだいいねした投稿はありません。</p>
+<% end %>
+<% end %>
+
+
+<%= link_to "Tweet一覧に戻る", items_path %>
