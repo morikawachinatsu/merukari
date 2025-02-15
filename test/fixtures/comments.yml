@@ -3,9 +3,9 @@
 one:
   content: MyString
   user: one
-  tweet: one
+  item: one
 
 two:
   content: MyString
   user: two
-  tweet: two
+  item: two

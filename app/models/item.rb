@@ -17,7 +17,7 @@ class Item < ApplicationRecord
     favorites.exists?(user_id: user.id)
   end
 
-   has_many :comments, as: :commentable, dependent: :destroy
+  has_many :comments, dependent: :destroy
    has_many :item_tag_relations, dependent: :destroy
   has_many :tags, through: :item_tag_relations, dependent: :destroy
 end

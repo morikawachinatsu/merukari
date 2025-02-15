@@ -19,7 +19,7 @@
 
   <div class="mb-3">
     <%= f.label :description, "説明", class: "font-semibold block p-1" %>
-    <%= f.text_field :description, size: 140, class: "form-input" %>
+    <%= f.text_area :description, size: 140, class: "form-input" %>
   </div>
 
   <div class="mb-3">
@@ -102,17 +102,18 @@
   
     <% end %>
     <% end %>
+    <%= link_to "詳細へ", item_path(item), class: "btn btn-primary mr-2" %>
     
 
     <div class="actions mt-4">
-      <% if user_signed_in? && current_user.id == item.user_id %>
-      <%= link_to "詳細へ", item_path(item), class: "btn btn-primary mr-2" %>
-      <%= link_to "編集する", edit_item_path(item), class: "btn btn-secondary mr-2" %>
-      <%= link_to "削除する", item_path(item), data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" }, class: "btn btn-danger" %>
+      <% if user_signed_in? %>
+      <% if current_user.id == item.user_id %>
+        <%= link_to "編集する", edit_item_path(item) %> <%= link_to "削除する", item_path(item), data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" }, class: "btn btn-danger" %>
       <% elsif current_user.admin? %>
         <%= link_to "管理者用編集", edit_post_path(t.id) %>
         <%= link_to "管理者用削除", post_path(t.id), data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" }, class: "btn btn-danger" %>
       <% end %>
+    <% end %>
   
     </div>
 
